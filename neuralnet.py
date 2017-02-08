@@ -1,4 +1,3 @@
-#dependencies
 
 import numpy as np #matrix multiplication + maths
 import pandas #data management
