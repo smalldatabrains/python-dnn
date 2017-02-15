@@ -9,10 +9,10 @@ import os
 # X : input vector for each layer
 # W : Weights matrix
 # a : values vector after applying the sigmoid function to Z, a becomes the new input vector for the next layer
-# y : real value vector of the ouput
-# yth : theoritical value vector calculated by our network
-# e : error vector between y and yth
+# Yreal : real value vector of the ouput
+# Yth : theoritical value vector calculated by our network
 # J : costfunction, return single value
+# gradient : gradient of J regarding the Weights
 
 def normalize(X):
 	return X/np.amax(X)
@@ -137,3 +137,4 @@ for epoch in range (10000):
 	grad=gradient(Yth,Yreal,X,J,W)
 	for layer in range(len(W)):
 		W[layer]=gradient_descent(grad[layer],W[layer],b[layer],learning_rate)
+
