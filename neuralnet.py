@@ -21,8 +21,8 @@ def sigmoid(z):
 	return 1.0/(1.0+np.exp(-z))
 
 def softmax(z):
-    softmax = np.exp(z-np.max(z))/np.sum(np.exp(z-np.max(z)),axis=1,keepdims=True)
-    return softmax
+	softmax = np.exp(z-np.max(z))/np.sum(np.exp(z-np.max(z)),axis=1,keepdims=True)
+	return softmax
 		
 def dsigmoid(z):
 	return np.exp(-z)/(1+np.exp(-z))**2
@@ -77,18 +77,18 @@ def gradient(Yth,Yreal,X,J,W):
 		else:
 			Z[layer]=np.dot(a[layer-1],W[layer])
 			a[layer]=sigmoid(Z[layer])
-		print('Zshape is :' ,Z[layer].shape)
+
 
 	for layer in reversed(range(len(W))):
 		if layer==len(W)-1:
 			delta[layer]=np.multiply(-(Yreal-Yth),dsigmoid(Z[layer]))
-			print('delta[1] shape is : ',delta[layer].shape)
+
 			gradient[layer]=np.dot(a[layer-1].transpose(),delta[layer])
-			print('gradient[1] shape is : ',gradient[1].shape)
+
 		else:
 			delta[layer]=np.dot(delta[layer+1],W[layer+1].transpose())*dsigmoid(Z[layer])
 			gradient[layer]=np.dot(X.transpose(),delta[layer])
-			print('gradient[0] shape is : ',gradient[0].shape)
+
 	return gradient
 
 def gradient_descent(gradient,W,b,learning_rate):
@@ -125,16 +125,12 @@ W,b=create_network(X,n_hidden,n_neurons,y)
 #Calculate 1st forward propagation and initial cost-------------------------------------------------
 Yth=forward(X,W,b)
 
-print('Yth shape is : ',Yth.shape)
-
 J=cost(Yth,Yreal)
 
 learning_rate=0.0005
 
 #training the network-------------------------------------------------------------------------------
-for epoch in range (10):
-	print('W[0] shape is : ',W[0].shape)
-	print('W[1] shape is : ',W[1].shape)
+for epoch in range (10000):
 	Yth=forward(X,W,b)
 	J=cost(Yth,Yreal)
 	print('cost is : ',J)
