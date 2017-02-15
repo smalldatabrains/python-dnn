@@ -1,23 +1,10 @@
+#dependencies---------------------------------------------------------------------------------------
 
 import numpy as np #matrix multiplication + maths
-import pandas #data management
+import pandas as pd#data management
 import os
 
-#data retrieving
-os.chdir("C:\\Users\\Nicolas\\Desktop\\Company\\python-own neuralnetwork")
-data=pandas.read_csv("data.csv",sep=";")
-
-#m : number of exemples, p : numbers of features
-m=data.shape[0]
-p=data.shape[1]
-
-#Separating Inputs and outputs
-X=data.ix[:,0:p-1] #not including p-1
-y=data.iloc[:,p-1]
-
-#seed random number
-np.random.seed(0)
-
+#network definitions--------------------------------------------------------------------------------
 # Z : output vector for each layer
 # X : input vector for each layer
 # W : Weights matrix
@@ -27,58 +14,133 @@ np.random.seed(0)
 # e : error vector between y and yth
 # J : costfunction, return single value
 
-#normalization of the inputs	
-def scaling(X):
-	Xnorm=X/np.amax(X)
-	return Xnorm
-	
-Xnorm=scaling(X)
+def normalize(X):
+	return X/np.amax(X)
 
-class myneuralnetwork(X,y):
-	#hyperparameters and weights
-	def __init__(self):
-		#variables
-		self.learning_rate=0.01
-		self.regularizationterm=2
-		self.n_sample=1000
-		self.n_hidden=2
-		self.n_neurons=[p-1,5,3,1] #for each hidden layer we set the number of neurons, p-1 refers to input, last layer is the output y
-		
-		self.W={}
-		#initialize random weights for first forward propagation (include bias neurons for each layer)
-		for layer in range(n_hidden+1):
-			self.W[layer]=np.random.randn(n_neurons[layer],n_neurons[layer+1]+1)
+def sigmoid(z):
+	return 1.0/(1.0+np.exp(-z))
 
+def softmax(z):
+    softmax = np.exp(z-np.max(z))/np.sum(np.exp(z-np.max(z)),axis=1,keepdims=True)
+    return softmax
 		
-	#sigmoid function definition
-	def sigmoid(z):
-		sigmoid=1.0/(1.0+np.exp(-z))
-		return sigmoid
-		
-	def dsigmoid(z):
-		return np.exp(-z)/(1+np.exp(-z))^2
+def dsigmoid(z):
+	return np.exp(-z)/(1+np.exp(-z))**2
+
+def Weights(k,l):
+	return np.random.randn(k,l)
+
+def bias(l):
+	return np.random.rand(l) #it is better to start with positive values for bias
+
+def create_network(input,n_hidden,n_neurons,output):
+	W=dict()
+	b=dict()
+	for i in range(n_hidden+1):
+		if i==0:
+			W[i]=Weights(input.shape[1],n_neurons[i])
+			b[i]=bias(n_neurons[i])
+		elif i==n_hidden:
+			W[i]=Weights(n_neurons[i-1],2)
+			b[i]=bias(2)
+		else:
+			W[i]=Weights(n_neurons[i-1],n_neurons[i])
+			b[i]=bias(n_neurons[i])
+	return W,b
+
+def forward(input,W,b):
+	for layer in range(len(W)):
+		if layer==0:
+			print('first layer')
+			Yth=np.dot(input,W[layer])+b[layer]
+			Yth=sigmoid(Yth)
+		elif layer==len(W)-1:
+			print('softmax')
+			Yth=np.dot(Yth,W[layer])+b[layer]
+			Yth=softmax(Yth)
+		else:
+			print('intermediate layer')
+			Yth=np.dot(Yth,W[layer])+b[layer]
+			Yth=sigmoid(Yth)
+	return Yth
+
+def cost(Yth,Yreal):
+	J=np.sum((Yth-Yreal)**2)/(2*len(Yreal))
+	return J
+
+def gradient(Yth,Yreal,X,J,W):
+	gradient=dict()
+	delta=dict()
+	Z=dict()
+	a=dict()
+	for layer in range(len(W)):
+		if layer==0:
+			Z[layer]=np.dot(X,W[layer])
+			a[layer]=sigmoid(Z[layer])
+		else:
+			Z[layer]=np.dot(a[layer-1],W[layer])
+			a[layer]=sigmoid(Z[layer])
+		print(Z[0].shape)
+
+	for layer in reversed(range(len(W))):
+		if layer==len(W)-1:
+			delta[layer]=np.multiply(-(Yreal-Yth),dsigmoid(Z[layer]))
+			gradient[layer]=np.dot(a[layer-1].transpose(),delta[layer])
+			print(gradient[1].shape)
+		else:
+			delta[layer]=np.dot(delta[layer+1],W[layer].transpose())*dsigmoid(Z[layer])
+			gradient[layer]=np.dot(X.transpose(),delta[layer])
+	return gradient
+
+def gradient_descent(gradient,W,b,learning_rate):
+	for layer in range(len(W)):
+		W[layer]=W[layer]-learning_rate*gradient[layer]
+	return W
+
+#data retrieving------------------------------------------------------------------------------------
+os.chdir("C:\\Users\\Nicolas\\Google Drive\\website\\python-own neuralnetwork")
+data=pd.read_csv("data.csv",sep=";")
+
+#m : number of exemples, p : numbers of features
+m=data.shape[0]
+p=data.shape[1]
+
+#Separating Inputs and outputs ---------------------------------------------------------------------
+X=data.ix[:,0:p-1] #not including p-1
+y=data.iloc[:,p-1]
+Yreal=[]
+for i in range(len(y)):
+	if y[i]==1:
+		Yreal.append([1,0])
+	elif y[i]==0:
+		Yreal.append([0,1])
+
+#parameters-----------------------------------------------------------------------------------------
+n_neurons=[3]
+n_hidden=len(n_neurons)
+
+#normalization of the inputs and network initialization---------------------------------------------
+X=normalize(X)
+W,b=create_network(X,n_hidden,n_neurons,y)
 	
-	#forward propagation
-	def forward(self,X):
-		self.Z={}
-		self.A={}
-		self.A[0]=X
-		for layer in range(n_hidden+1):
-			self.Z[layer+1]=np.dot(self.A[layer],self.W[layer])
-			A[layer+1]=self.sigmoid(self.Z[layer+1])
-	
-		yth=A[self.n_hidden+1]
-		return yth
-	
-	#cost function and gradient calculation
-	def cost():
-		J=np.sum(1/2*(y-yth)^2)
-		return J
-	
-	def dcost():
-		dJ={}
-		for layer in range(n_hidden+1):
-			dJ[layer]=1
-		return dJ
-	
-myneuralnetwork(Xnorm,y)
+#Calculate 1st forward propagation and initial cost-------------------------------------------------
+Yth=forward(X,W,b)
+print(Yth)
+print(Yth.shape)
+
+J=cost(Yth,Yreal)
+
+learning_rate=0.05
+
+#training the network-------------------------------------------------------------------------------
+for epoch in range (1):
+	print(W[0].shape)
+	print(W[1].shape)
+	Yth=forward(X,W,b)
+	J=cost(Yth,Yreal)
+	print(J)
+	gradient=gradient(Yth,Yreal,X,J,W)
+	print(gradient[0].shape)
+	print(gradient[1].shape)
+	for layer in range(len(W)):
+		W[layer],b[layer]=gradient_descent(gradient[layer],W[layer],b[layer],learning_rate)
