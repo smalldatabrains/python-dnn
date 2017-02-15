@@ -51,15 +51,12 @@ def create_network(input,n_hidden,n_neurons,output):
 def forward(input,W,b):
 	for layer in range(len(W)):
 		if layer==0:
-			print('first layer')
 			Yth=np.dot(input,W[layer])+b[layer]
 			Yth=sigmoid(Yth)
 		elif layer==len(W)-1:
-			print('softmax')
 			Yth=np.dot(Yth,W[layer])+b[layer]
 			Yth=softmax(Yth)
 		else:
-			print('intermediate layer')
 			Yth=np.dot(Yth,W[layer])+b[layer]
 			Yth=sigmoid(Yth)
 	return Yth
@@ -80,16 +77,18 @@ def gradient(Yth,Yreal,X,J,W):
 		else:
 			Z[layer]=np.dot(a[layer-1],W[layer])
 			a[layer]=sigmoid(Z[layer])
-		print(Z[0].shape)
+		print('Zshape is :' ,Z[layer].shape)
 
 	for layer in reversed(range(len(W))):
 		if layer==len(W)-1:
 			delta[layer]=np.multiply(-(Yreal-Yth),dsigmoid(Z[layer]))
+			print('delta[1] shape is : ',delta[layer].shape)
 			gradient[layer]=np.dot(a[layer-1].transpose(),delta[layer])
-			print(gradient[1].shape)
+			print('gradient[1] shape is : ',gradient[1].shape)
 		else:
-			delta[layer]=np.dot(delta[layer+1],W[layer].transpose())*dsigmoid(Z[layer])
+			delta[layer]=np.dot(delta[layer+1],W[layer+1].transpose())*dsigmoid(Z[layer])
 			gradient[layer]=np.dot(X.transpose(),delta[layer])
+			print('gradient[0] shape is : ',gradient[0].shape)
 	return gradient
 
 def gradient_descent(gradient,W,b,learning_rate):
@@ -125,22 +124,20 @@ W,b=create_network(X,n_hidden,n_neurons,y)
 	
 #Calculate 1st forward propagation and initial cost-------------------------------------------------
 Yth=forward(X,W,b)
-print(Yth)
-print(Yth.shape)
+
+print('Yth shape is : ',Yth.shape)
 
 J=cost(Yth,Yreal)
 
-learning_rate=0.05
+learning_rate=0.0005
 
 #training the network-------------------------------------------------------------------------------
-for epoch in range (1):
-	print(W[0].shape)
-	print(W[1].shape)
+for epoch in range (10):
+	print('W[0] shape is : ',W[0].shape)
+	print('W[1] shape is : ',W[1].shape)
 	Yth=forward(X,W,b)
 	J=cost(Yth,Yreal)
-	print(J)
-	gradient=gradient(Yth,Yreal,X,J,W)
-	print(gradient[0].shape)
-	print(gradient[1].shape)
+	print('cost is : ',J)
+	grad=gradient(Yth,Yreal,X,J,W)
 	for layer in range(len(W)):
-		W[layer],b[layer]=gradient_descent(gradient[layer],W[layer],b[layer],learning_rate)
+		W[layer]=gradient_descent(grad[layer],W[layer],b[layer],learning_rate)
