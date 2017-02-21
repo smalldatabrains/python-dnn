@@ -3,6 +3,7 @@
 import numpy as np #matrix multiplication + maths
 import pandas as pd#data management
 import os
+import matplotlib.pyplot as plt
 
 #network definitions--------------------------------------------------------------------------------
 # Z : output vector for each layer
@@ -10,7 +11,7 @@ import os
 # W : Weights matrix
 # a : values vector after applying the sigmoid function to Z, a becomes the new input vector for the next layer
 # Yreal : real value vector of the ouput
-# Yth : theoritical value vector calculated by our network
+# Yth : theoritical value vector calculated by our network after forward propagation
 # J : costfunction, return single value
 # gradient : gradient of J regarding the Weights
 
@@ -81,15 +82,19 @@ def gradient(Yth,Yreal,X,J,W):
 
 	for layer in reversed(range(len(W))):
 		if layer==len(W)-1:
-			delta[layer]=np.multiply(-(Yreal-Yth),dsigmoid(Z[layer]))
-
+			delta[layer]=np.multiply((Yth-Yreal),dsigmoid(Z[layer]))
 			gradient[layer]=np.dot(a[layer-1].transpose(),delta[layer])
 
 		else:
-			delta[layer]=np.dot(delta[layer+1],W[layer+1].transpose())*dsigmoid(Z[layer])
-			gradient[layer]=np.dot(X.transpose(),delta[layer])
+			if layer==0:
+				delta[layer]=np.dot(delta[layer+1],W[layer+1].transpose())*dsigmoid(Z[layer])
+				gradient[layer]=np.dot(X.transpose(),delta[layer])
+			else:
+				delta[layer]=np.dot(delta[layer+1],W[layer+1].transpose())*dsigmoid(Z[layer])
+				gradient[layer]=np.dot(a[layer-1].transpose(),delta[layer])
 
-	return gradient
+
+	return gradient,a
 
 def gradient_descent(gradient,W,b,learning_rate):
 	for layer in range(len(W)):
@@ -115,7 +120,7 @@ for i in range(len(y)):
 		Yreal.append([0,1])
 
 #parameters-----------------------------------------------------------------------------------------
-n_neurons=[3]
+n_neurons=[4]
 n_hidden=len(n_neurons)
 
 #normalization of the inputs and network initialization---------------------------------------------
@@ -130,11 +135,21 @@ J=cost(Yth,Yreal)
 learning_rate=0.0005
 
 #training the network-------------------------------------------------------------------------------
-for epoch in range (10000):
+for epoch in range (3000):
 	Yth=forward(X,W,b)
 	J=cost(Yth,Yreal)
 	print('cost is : ',J)
-	grad=gradient(Yth,Yreal,X,J,W)
+	grad,a=gradient(Yth,Yreal,X,J,W)
 	for layer in range(len(W)):
 		W[layer]=gradient_descent(grad[layer],W[layer],b[layer],learning_rate)
+
+	
+inter=np.reshape(a[0][1],[2,2])
+plt.matshow(inter)	
+plt.show()
+#prediction on test set-----------------------------------------------------------------------------
+Yth=forward(X,W,b)
+print(Yth)
+
+#accuracy measurement-------------------------------------------------------------------------------
 
