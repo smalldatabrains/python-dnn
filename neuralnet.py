@@ -102,7 +102,7 @@ def gradient_descent(gradient,W,b,learning_rate):
 	return W
 
 #data retrieving------------------------------------------------------------------------------------
-os.chdir("C:\\Users\\Nicolas\\Google Drive\\website\\python-own neuralnetwork")
+os.chdir("")
 data=pd.read_csv("data.csv",sep=";")
 
 #m : number of exemples, p : numbers of features
