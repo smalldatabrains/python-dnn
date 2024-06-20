@@ -21,12 +21,18 @@ def normalize(X):
 def sigmoid(z):
 	return 1.0/(1.0+np.exp(-z))
 
+def tanh(z):
+	return  np.tanh(z)
+
 def softmax(z):
 	softmax = np.exp(z-np.max(z))/np.sum(np.exp(z-np.max(z)),axis=1,keepdims=True)
 	return softmax
 		
 def dsigmoid(z):
 	return np.exp(-z)/(1+np.exp(-z))**2
+
+def dtanh(z):
+	return 1 - tanh(z)**2
 
 def Weights(k,l):
 	return np.random.randn(k,l)
