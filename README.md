@@ -1,6 +1,12 @@
 # neuralnet
 
-A from scratch implementation of neural network with numpy. Quantity of layers and quantity of neurons per layer can be passed as a list.
+A from scratch implementation of neural network with numpy. Quantity of layers and quantity of neurons per layer can be passed as a list to the create_network function :
+- n_hidden being the quantity of layers in your network
+- n_neurons being a list with quantity of neurons per layer
+
+please follow https://smalldatabrains.com/python-neural-network/ for deeper explanation about mathematicals principles in neural network.
+
+![alt text](image.png)
 
 ## To do list
 - activation functions
