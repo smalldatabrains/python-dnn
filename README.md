@@ -22,3 +22,6 @@ please follow https://smalldatabrains.com/python-neural-network/ for deeper expl
 - loss function
     - MSE [x]
     - cross entropy
+
+- model saving
+- play with mnist drawings (draw.py interface)
